@@ -13,7 +13,6 @@ const TASKS_KEY = "@omeudia:tasks";
 type TasksCtx = {
   tasks: Task[];
   isLoaded: boolean;
-  addTask: (t: Omit<Task, "id">) => void;
   addTask: (t: Omit<Task, "id" | "completed">) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   removeTask: (id: string) => void;
