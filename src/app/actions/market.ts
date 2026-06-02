@@ -2,20 +2,32 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
+async function getUserId() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) throw new Error("Não autorizado");
+  return session.user.id;
+}
 
 export async function getMarketItemsAction() {
+  const userId = await getUserId();
   const items = await prisma.marketItem.findMany({
+    where: { userId },
     orderBy: { createdAt: "asc" },
   });
   return items;
 }
 
 export async function createMarketItemAction(data: { title: string; category: string }) {
+  const userId = await getUserId();
   const item = await prisma.marketItem.create({
     data: {
       title: data.title,
       category: data.category,
       bought: false,
+      userId,
     }
   });
   revalidatePath("/supermercado");
@@ -23,8 +35,9 @@ export async function createMarketItemAction(data: { title: string; category: st
 }
 
 export async function updateMarketItemAction(id: string, data: { title?: string; category?: string; bought?: boolean }) {
+  const userId = await getUserId();
   const item = await prisma.marketItem.update({
-    where: { id },
+    where: { id, userId },
     data
   });
   revalidatePath("/supermercado");
@@ -32,16 +45,19 @@ export async function updateMarketItemAction(id: string, data: { title?: string;
 }
 
 export async function deleteMarketItemAction(id: string) {
-  await prisma.marketItem.delete({ where: { id } });
+  const userId = await getUserId();
+  await prisma.marketItem.delete({ where: { id, userId } });
   revalidatePath("/supermercado");
 }
 
 export async function clearBoughtMarketItemsAction() {
-  await prisma.marketItem.deleteMany({ where: { bought: true } });
+  const userId = await getUserId();
+  await prisma.marketItem.deleteMany({ where: { bought: true, userId } });
   revalidatePath("/supermercado");
 }
 
 export async function clearAllMarketItemsAction() {
-  await prisma.marketItem.deleteMany({});
+  const userId = await getUserId();
+  await prisma.marketItem.deleteMany({ where: { userId } });
   revalidatePath("/supermercado");
 }
