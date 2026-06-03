@@ -15,7 +15,7 @@ export function ReminderItem({ reminder }: { reminder: Reminder }) {
     if (reminder.repeat === "daily") date.setDate(date.getDate() + 1);
     if (reminder.repeat === "weekly") date.setDate(date.getDate() + 7);
     if (reminder.repeat === "monthly") date.setMonth(date.getMonth() + 1);
-    updateReminder(reminder.id, { nextDate: date.toISOString().slice(0, 16) });
+    updateReminder(reminder.id, { nextDate: date.toISOString() });
   };
 
   const isUpcoming = new Date(reminder.nextDate) <= new Date(Date.now() + 60 * 60 * 1000);

@@ -14,7 +14,8 @@ export function ReminderForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !nextDate) return;
-    addReminder({ title: title.trim(), nextDate, repeat });
+    const isoDate = new Date(nextDate).toISOString();
+    addReminder({ title: title.trim(), nextDate: isoDate, repeat });
     setTitle(""); setNextDate(""); setRepeat("none");
   };
 
