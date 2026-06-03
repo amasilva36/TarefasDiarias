@@ -4,7 +4,8 @@ import { useMarket } from "@/lib/store";
 import { MarketForm } from "@/components/MarketForm";
 import { MarketItemView } from "@/components/MarketItem";
 import { MARKET_CATEGORIES, MarketItem } from "@/lib/storage";
-import { Trash2, RefreshCcw, ArrowDownAZ } from "lucide-react";
+import { Trash2, RefreshCcw, ArrowDownAZ, Share2, Check } from "lucide-react";
+import { useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -23,6 +24,7 @@ import {
 
 export default function SupermercadoPage() {
   const { items, clearBought, clearAll, reorderItems, isLoaded } = useMarket();
+  const [copied, setCopied] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -84,7 +86,6 @@ export default function SupermercadoPage() {
   };
 
   const handleResetOrder = () => {
-    // Sort all items alphabetically within each category and reassign orderIndex
     const updates: { id: string; orderIndex: number }[] = [];
     MARKET_CATEGORIES.forEach((category) => {
       const catItems = items
@@ -95,6 +96,47 @@ export default function SupermercadoPage() {
       });
     });
     if (updates.length > 0) reorderItems(updates);
+  };
+
+  const CATEGORY_EMOJI: Record<string, string> = {
+    "Frutas e Legumes": "🥦",
+    "Laticínios": "🥛",
+    "Padaria": "🍞",
+    "Carnes e Peixe": "🥩",
+    "Congelados": "🧊",
+    "Bebidas": "🥤",
+    "Higiene": "🧴",
+    "Limpeza": "🧹",
+    "Outros": "📦",
+    "Diversos": "🛒",
+  };
+
+  const handleShare = async () => {
+    const lines: string[] = ["🛒 *Lista do Supermercado*\n"];
+    groupedItems.forEach(({ category, items: catItems }) => {
+      const emoji = CATEGORY_EMOJI[category] ?? "•";
+      lines.push(`${emoji} *${category}*`);
+      catItems
+        .filter((i) => !i.bought)
+        .forEach((i) => lines.push(`  ☐ ${i.title}`));
+      catItems
+        .filter((i) => i.bought)
+        .forEach((i) => lines.push(`  ✅ ~${i.title}~`));
+      lines.push("");
+    });
+    const text = lines.join("\n").trim();
+
+    if (navigator.share) {
+      // Mobile: abre menu nativo (WhatsApp, Messenger, etc.)
+      try {
+        await navigator.share({ title: "Lista do Supermercado", text });
+      } catch (_) { /* utilizador cancelou */ }
+    } else {
+      // Desktop: copia para clipboard
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
   };
 
   return (
@@ -114,6 +156,16 @@ export default function SupermercadoPage() {
           </div>
           {items.length > 0 && (
             <div className="flex items-center gap-1 flex-wrap justify-end">
+              <button
+                onClick={handleShare}
+                title="Partilhar lista"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-muted-foreground hover:text-emerald-400 border border-border rounded-lg hover:border-emerald-400/50 transition-all"
+              >
+                {copied
+                  ? <><Check className="w-3.5 h-3.5 text-emerald-400" /> <span className="text-emerald-400">Copiado!</span></>
+                  : <><Share2 className="w-3.5 h-3.5" /> Partilhar</>
+                }
+              </button>
               <button
                 onClick={handleResetOrder}
                 title="Ordenar alfabeticamente"
