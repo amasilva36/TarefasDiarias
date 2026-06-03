@@ -45,7 +45,7 @@ export function TaskItem({ task }: { task: Task }) {
 
   if (isEditing) {
     return (
-      <div className="flex flex-col gap-3 p-4 border-b border-border bg-card/80 backdrop-blur-md animate-[fadeSlideIn_0.25s_ease-out]">
+      <div className="task-enter flex flex-col gap-3 p-4 border-b border-border bg-card/80 backdrop-blur-md">
         <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
           className="w-full bg-transparent border-b border-border pb-1 focus:outline-none text-sm text-foreground focus:border-primary transition-colors" autoFocus />
         <div className="flex items-center gap-2">
@@ -62,11 +62,11 @@ export function TaskItem({ task }: { task: Task }) {
   }
 
   return (
-    <div className={cn("flex items-center gap-3 p-4 border-b border-border bg-card/40 backdrop-blur-sm transition-all hover:bg-card/80 hover:scale-[1.01] hover:shadow-lg animate-[fadeSlideIn_0.3s_ease-out]", task.completed && "opacity-50")}>
+    <div className={cn("task-enter flex items-center gap-3 p-4 border-b border-border bg-card/40 backdrop-blur-sm transition-all hover:bg-card/80 hover:scale-[1.01] hover:shadow-lg", task.completed && "opacity-50")}>
       <button onClick={handleToggleComplete}
         className={cn("w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300",
           task.completed ? "bg-primary border-primary text-primary-foreground scale-110" : "border-muted-foreground hover:border-primary")}>
-        {task.completed && <Check className="w-3.5 h-3.5 animate-[popIn_0.2s_ease-out]" />}
+        {task.completed && <Check className="w-3.5 h-3.5 check-pop" />}
       </button>
       <div className="flex-1 min-w-0">
         <p className={cn("text-sm font-medium truncate transition-all duration-300", task.completed && "line-through text-muted-foreground")}>{task.title}</p>
