@@ -22,10 +22,13 @@ function urlBase64ToUint8Array(base64String: string) {
 
 async function getOrRegisterSW(): Promise<ServiceWorkerRegistration | null> {
   try {
-    // Regista o nosso sw.js explicitamente
+    // Tenta obter registo existente
+    const existing = await navigator.serviceWorker.getRegistration('/');
+    if (existing) return existing;
+
+    // Regista o sw.js e aguarda 3 segundos para ativar
     const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-    // Aguarda que fique ativo
-    await navigator.serviceWorker.ready;
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     return reg;
   } catch (e) {
     console.error("Erro ao registar Service Worker:", e);
@@ -44,7 +47,7 @@ export default function PushNotificationManager() {
       return;
     }
 
-    // Timeout de segurança: se o SW demorar mais de 4s, mostra o botão na mesma
+    // Timeout de segurança: se o SW demorar mais de 4s, mostra o botão
     const timeout = setTimeout(() => setLoading(false), 4000);
 
     navigator.serviceWorker.ready.then((reg) => {
@@ -66,64 +69,72 @@ export default function PushNotificationManager() {
     setLoading(true);
     try {
       if (!publicVapidKey) {
-        alert("Erro de configuração: A chave de notificações não está configurada no servidor. Verifique as variáveis de ambiente na Vercel.");
+        alert("❌ Erro: Chave VAPID não configurada no servidor.\nVerifica as variáveis de ambiente na Vercel.");
         setLoading(false);
         return;
       }
 
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        alert("O teu browser não suporta notificações Push.");
+        alert("❌ O teu browser não suporta notificações Push.");
         setLoading(false);
         return;
       }
 
       if (Notification.permission === 'denied') {
-        alert("As notificações estão bloqueadas! Vai às definições do site no teu browser e 'Permite' as Notificações.");
+        alert("❌ Notificações bloqueadas!\nVai às definições do site no browser e permite as notificações.");
         setLoading(false);
         return;
       }
 
-      const result = await Notification.requestPermission();
+      const permResult = await Notification.requestPermission();
+      if (permResult !== 'granted') {
+        alert("⚠️ Permissão negada. Não vais receber notificações.");
+        setLoading(false);
+        return;
+      }
 
-      if (result === 'granted') {
-        // Tenta obter ou registar o Service Worker diretamente
-        const reg = await getOrRegisterSW();
+      // Passo 1: obter o Service Worker
+      alert("🔄 A ativar... (pode demorar alguns segundos)");
+      const reg = await getOrRegisterSW();
 
-        if (!reg) {
-          alert("Erro: Não foi possível ativar o sistema de notificações. Tenta fechar a app e abrir novamente.");
-          setLoading(false);
-          return;
-        }
+      if (!reg) {
+        alert("❌ Não foi possível iniciar o sistema de notificações.\nFecha a app completamente e tenta de novo.");
+        setLoading(false);
+        return;
+      }
 
-        const sub = await reg.pushManager.subscribe({
+      // Passo 2: criar a subscrição push
+      let sub: PushSubscription;
+      try {
+        sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(publicVapidKey),
         });
+      } catch (subErr: any) {
+        alert("❌ Erro ao criar subscrição push:\n" + subErr.message + "\n\nTenta fechar e abrir a app de novo.");
+        setLoading(false);
+        return;
+      }
 
-        setSubscription(sub);
-        setIsSubscribed(true);
+      setSubscription(sub);
+      setIsSubscribed(true);
 
-        // Guarda na base de dados
-        const response = await fetch('/api/push/subscribe', {
-          method: 'POST',
-          body: JSON.stringify(sub),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+      // Passo 3: guardar na base de dados
+      const response = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        body: JSON.stringify(sub),
+        headers: { 'Content-Type': 'application/json' },
+      });
 
-        if (response.ok) {
-          alert("✅ Notificações ativadas com sucesso!");
-        } else {
-          const err = await response.text();
-          alert("Erro ao guardar subscrição: " + err);
-        }
+      if (response.ok) {
+        alert("✅ Notificações ativadas com sucesso!\nVais receber avisos quando chegar a hora dos lembretes.");
       } else {
-        alert("A permissão foi negada ou fechada. Não vais receber notificações.");
+        const errText = await response.text();
+        alert("⚠️ Subscrição criada mas erro ao guardar:\n" + errText);
       }
     } catch (e: any) {
       console.error("Erro ao subscrever:", e);
-      alert("Erro ao ativar: " + e.message);
+      alert("❌ Erro inesperado:\n" + (e.message || String(e)));
     }
     setLoading(false);
   };
