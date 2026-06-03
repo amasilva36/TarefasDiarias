@@ -1,4 +1,4 @@
-# O Meu Dia - PWA
+# O Meu Dia - PWA (Deploy 2)
 
 Uma aplicação focada em produtividade para gerir as suas Tarefas, Lembretes e Lista de Supermercado num só lugar.
 
