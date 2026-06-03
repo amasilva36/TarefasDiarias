@@ -1,7 +1,8 @@
 "use client";
 
 import { useTasks, useMarket } from "@/lib/store";
-import { CheckSquare, ShoppingCart } from "lucide-react";
+import { CheckSquare, ShoppingCart, LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 export function StatsBar() {
   const { tasks, isLoaded: tasksLoaded } = useTasks();
@@ -25,10 +26,20 @@ export function StatsBar() {
           </span>
         )}
       </div>
-      <div className="flex items-center gap-2">
-        <ShoppingCart className="w-3.5 h-3.5 text-primary" />
-        <span className="text-foreground font-semibold">{pendingMarket}</span>
-        <span>por comprar</span>
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5">
+          <ShoppingCart className="w-3.5 h-3.5 text-primary" />
+          <span className="text-foreground font-semibold">{pendingMarket}</span>
+        </div>
+        <div className="w-[1px] h-4 bg-border mx-1"></div>
+        <button 
+          onClick={() => signOut({ callbackUrl: '/login' })}
+          className="flex items-center gap-1 text-muted-foreground hover:text-destructive transition-colors"
+          title="Sair (Logout)"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span className="sr-only">Sair</span>
+        </button>
       </div>
     </div>
   );

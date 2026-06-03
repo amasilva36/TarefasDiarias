@@ -46,8 +46,28 @@ export default function PushNotificationManager() {
   const subscribeButtonOnClick = async () => {
     setLoading(true);
     try {
+      if (!publicVapidKey) {
+        alert("Erro de configuração: Chave VAPID não encontrada no servidor.");
+        setLoading(false);
+        return;
+      }
+
+      // Check current permission state before requesting
+      if (Notification.permission === 'denied') {
+        alert("As notificações estão bloqueadas! Vai às definições do site no teu browser e 'Permite' as Notificações.");
+        setLoading(false);
+        return;
+      }
+
       const result = await Notification.requestPermission();
-      if (result === 'granted' && registration) {
+      
+      if (result === 'granted') {
+        if (!registration) {
+          alert("Erro: O sistema em segundo plano (Service Worker) não está pronto.");
+          setLoading(false);
+          return;
+        }
+
         const sub = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(publicVapidKey),
@@ -64,12 +84,14 @@ export default function PushNotificationManager() {
             'Content-Type': 'application/json',
           },
         });
+        
+        alert("Notificações ativadas com sucesso!");
       } else {
-        alert("Permissão para notificações negada.");
+        alert("A permissão foi negada ou fechada.");
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("Erro ao subscrever:", e);
-      alert("Erro ao subscrever. Tenta novamente.");
+      alert("Erro ao ativar: " + e.message);
     }
     setLoading(false);
   };
