@@ -26,10 +26,10 @@ async function getOrRegisterSW(): Promise<ServiceWorkerRegistration | null> {
     const existing = await navigator.serviceWorker.getRegistration('/');
     if (existing) return existing;
 
-    // Regista o sw.js e aguarda 3 segundos para ativar
-    const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    return reg;
+    // Regista o sw.js e aguarda que fique completamente ativo
+    await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    const activeReg = await navigator.serviceWorker.ready;
+    return activeReg;
   } catch (e) {
     console.error("Erro ao registar Service Worker:", e);
     return null;

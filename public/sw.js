@@ -1,10 +1,6 @@
-// Service Worker principal - trata push notifications e caching
-// Carrega o service worker de caching gerado pelo next-pwa
-try {
-  importScripts('/sw-cache.js');
-} catch (e) {
-  console.log('sw-cache.js nao disponivel, continuando sem cache offline');
-}
+// Service Worker principal - trata push notifications
+// Sem dependências externas para garantir a estabilidade
+
 
 // --- Push Notifications ---
 self.addEventListener('push', function (event) {
