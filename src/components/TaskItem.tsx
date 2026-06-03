@@ -10,6 +10,7 @@ import confetti from "canvas-confetti";
 export function TaskItem({ task }: { task: Task }) {
   const { tasks, updateTask, removeTask } = useTasks();
   const [isEditing, setIsEditing] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
   const [editDate, setEditDate] = useState(task.dueDate || "");
 
@@ -23,6 +24,12 @@ export function TaskItem({ task }: { task: Task }) {
 
   const handleCancel = () => {
     setEditTitle(task.title); setEditDate(task.dueDate || ""); setIsEditing(false);
+  };
+
+  const handleDelete = () => {
+    if (!confirm("Eliminar tarefa?")) return;
+    setIsLeaving(true);
+    setTimeout(() => removeTask(task.id), 420);
   };
 
   const handleToggleComplete = () => {
@@ -64,7 +71,7 @@ export function TaskItem({ task }: { task: Task }) {
   }
 
   return (
-    <div className={cn("task-enter flex items-center gap-3 p-4 border-b border-border bg-card/40 backdrop-blur-sm transition-all hover:bg-card/80 hover:scale-[1.01] hover:shadow-lg", task.completed && "opacity-50")}>
+    <div className={cn(isLeaving ? "task-leave" : "task-enter", "flex items-center gap-3 p-4 border-b border-border bg-card/40 backdrop-blur-sm transition-colors hover:bg-card/80 hover:scale-[1.01] hover:shadow-lg", task.completed && "opacity-50")}>
       <button onClick={handleToggleComplete}
         className={cn("w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300",
           task.completed ? "bg-primary border-primary text-primary-foreground scale-110" : "border-muted-foreground hover:border-primary")}>
@@ -91,7 +98,7 @@ export function TaskItem({ task }: { task: Task }) {
       </div>
       <div className="flex items-center gap-1 shrink-0">
         <button onClick={() => setIsEditing(true)} className="p-2 text-muted-foreground hover:text-primary rounded-full transition-colors"><Pencil className="w-4 h-4" /></button>
-        <button onClick={() => { if (confirm("Eliminar tarefa?")) removeTask(task.id); }} className="p-2 text-muted-foreground hover:text-destructive rounded-full transition-colors"><Trash2 className="w-4 h-4" /></button>
+        <button onClick={handleDelete} className="p-2 text-muted-foreground hover:text-destructive rounded-full transition-colors"><Trash2 className="w-4 h-4" /></button>
       </div>
     </div>
   );
