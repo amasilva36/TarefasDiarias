@@ -14,9 +14,21 @@ model User {
   password  String
   createdAt DateTime @default(now())
 
-  tasks       Task[]
-  reminders   Reminder[]
-  marketItems MarketItem[]
+  tasks             Task[]
+  reminders         Reminder[]
+  marketItems       MarketItem[]
+  pushSubscriptions PushSubscription[]
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Task {
@@ -37,6 +49,7 @@ model Reminder {
   title     String
   repeat    String
   nextDate  DateTime
+  notified  Boolean  @default(false)
   createdAt DateTime @default(now())
 
   userId    String

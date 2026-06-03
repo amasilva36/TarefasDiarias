@@ -3,6 +3,7 @@
 import { useReminders } from "@/lib/store";
 import { ReminderForm } from "@/components/ReminderForm";
 import { ReminderItem } from "@/components/ReminderItem";
+import PushNotificationManager from "@/components/PushNotificationManager";
 
 export default function LembretesPage() {
   const { reminders, isLoaded } = useReminders();
@@ -19,9 +20,12 @@ export default function LembretesPage() {
 
   return (
     <div className="flex flex-col min-h-full">
-      <div className="p-4 bg-card/50 backdrop-blur-md border-b border-border sticky top-0 z-10">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-cyan-300 bg-clip-text text-transparent">Lembretes</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">{sortedReminders.length} agendado{sortedReminders.length !== 1 ? "s" : ""}</p>
+      <div className="p-4 bg-card/50 backdrop-blur-md border-b border-border sticky top-0 z-10 flex flex-col gap-4">
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-cyan-300 bg-clip-text text-transparent">Lembretes</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">{sortedReminders.length} agendado{sortedReminders.length !== 1 ? "s" : ""}</p>
+        </div>
+        <PushNotificationManager />
       </div>
       <ReminderForm />
       <div className="flex-1 pb-6">
