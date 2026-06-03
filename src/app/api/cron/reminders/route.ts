@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import webpush from "web-push";
 
+export const dynamic = 'force-dynamic';
+
 // Configura o web-push com as tuas chaves. O email serve como identificação (subject)
 webpush.setVapidDetails(
   "mailto:app@omeudia.com",
