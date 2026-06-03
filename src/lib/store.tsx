@@ -32,18 +32,16 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addTask = async (task: Omit<Task, 'id' | 'completed'>) => {
-    const tempId = Math.random().toString(36).substr(2, 9);
-    const newTask = { ...task, id: tempId, completed: false } as Task;
-    setTasks(prev => [newTask, ...prev]); // optimistic update
-    
+    const clientKey = 'ck_' + Date.now();
+    const newTask = { ...task, id: clientKey, completed: false, _ck: clientKey } as any;
+    setTasks(prev => [newTask, ...prev]);
     try {
-      await createTaskAction(task);
-      // We could fetch again or assume it worked. Let's fetch to sync IDs.
-      const freshTasks = await getTasksAction();
-      setTasks(freshTasks as any);
+      const created = await createTaskAction(task) as any;
+      // Só atualiza o ID real sem substituir toda a lista (evita dupla animação)
+      setTasks(prev => prev.map(t => (t as any)._ck === clientKey ? { ...t, id: created.id } : t));
     } catch (e) {
       console.error(e);
-      setTasks(prev => prev.filter(t => t.id !== tempId)); // rollback
+      setTasks(prev => prev.filter(t => (t as any)._ck !== clientKey));
     }
   };
 

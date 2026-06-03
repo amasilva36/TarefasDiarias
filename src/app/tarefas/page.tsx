@@ -47,11 +47,11 @@ export default function TarefasPage() {
           </div>
         ) : (
           <>
-            {pending.map((task) => <TaskItem key={task.id} task={task} />)}
+            {pending.map((task) => <TaskItem key={(task as any)._ck || task.id} task={task} />)}
             {done.length > 0 && (
               <>
                 <div className="px-4 py-2 mt-2 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Concluídas ({done.length})</div>
-                {done.map((task) => <TaskItem key={task.id} task={task} />)}
+                {done.map((task) => <TaskItem key={(task as any)._ck || task.id} task={task} />)}
               </>
             )}
           </>
