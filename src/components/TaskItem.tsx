@@ -6,6 +6,7 @@ import { Task } from "@/lib/storage";
 import { useTasks } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
+import { getCategory, TASK_CATEGORIES } from "@/lib/categories";
 
 export function TaskItem({ task }: { task: Task }) {
   const { tasks, updateTask, removeTask } = useTasks();
@@ -13,17 +14,22 @@ export function TaskItem({ task }: { task: Task }) {
   const [isLeaving, setIsLeaving] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
   const [editDate, setEditDate] = useState(task.dueDate || "");
+  const [editCategory, setEditCategory] = useState(task.category || "");
 
   const isOverdue = !task.completed && task.dueDate && new Date(task.dueDate).getTime() < new Date().getTime();
 
   const handleSave = () => {
     if (!editTitle.trim()) return;
-    updateTask(task.id, { title: editTitle.trim(), dueDate: editDate || undefined });
+    updateTask(task.id, { 
+      title: editTitle.trim(), 
+      dueDate: editDate || undefined,
+      category: editCategory || undefined
+    });
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setEditTitle(task.title); setEditDate(task.dueDate || ""); setIsEditing(false);
+    setEditTitle(task.title); setEditDate(task.dueDate || ""); setEditCategory(task.category || ""); setIsEditing(false);
   };
 
   const handleDelete = () => {
@@ -62,6 +68,15 @@ export function TaskItem({ task }: { task: Task }) {
           <input type="datetime-local" value={editDate} onChange={(e) => setEditDate(e.target.value)}
             className="flex-1 text-sm bg-transparent border border-border rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-ring" />
         </div>
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4 mt-1">
+          {TASK_CATEGORIES.map(cat => (
+             <button key={cat.id} type="button" onClick={() => setEditCategory(cat.id === editCategory ? "" : cat.id)} 
+              className={cn("shrink-0 text-[10px] uppercase font-bold px-2 py-1 rounded-full border transition-all select-none", 
+                editCategory === cat.id ? cat.colorClass : "bg-card/40 border-border text-muted-foreground hover:bg-muted")}>
+               {cat.label}
+             </button>
+          ))}
+        </div>
         <div className="flex items-center justify-end gap-2 mt-2">
           <button onClick={handleCancel} className="p-1.5 text-muted-foreground hover:bg-muted rounded-full"><X className="w-4 h-4" /></button>
           <button onClick={handleSave} disabled={!editTitle.trim()} className="p-1.5 text-primary hover:bg-primary/20 rounded-full disabled:opacity-50"><Save className="w-4 h-4" /></button>
@@ -92,6 +107,11 @@ export function TaskItem({ task }: { task: Task }) {
             )}
             {task.urgent && (
               <span className="text-[10px] font-bold border border-orange-500 text-orange-500 px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(249,115,22,0.3)]">Urgente</span>
+            )}
+            {task.category && getCategory(task.category) && (
+              <span className={cn("text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border ml-auto", getCategory(task.category)?.colorClass)}>
+                {getCategory(task.category)?.label}
+              </span>
             )}
           </div>
         )}

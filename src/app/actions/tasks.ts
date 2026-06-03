@@ -24,10 +24,11 @@ export async function getTasksAction() {
     dueDate: t.dueDate?.toISOString(),
     reminderDate: t.reminderDate?.toISOString(),
     urgent: t.urgent,
+    category: t.category,
   }));
 }
 
-export async function createTaskAction(data: { title: string; dueDate?: string; reminderDate?: string; urgent?: boolean }) {
+export async function createTaskAction(data: { title: string; category?: string; dueDate?: string; reminderDate?: string; urgent?: boolean }) {
   const userId = await getUserId();
   const task = await prisma.task.create({
     data: {
@@ -35,6 +36,7 @@ export async function createTaskAction(data: { title: string; dueDate?: string; 
       dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
       reminderDate: data.reminderDate ? new Date(data.reminderDate) : undefined,
       urgent: data.urgent || false,
+      category: data.category,
       userId,
     }
   });
@@ -46,7 +48,7 @@ export async function createTaskAction(data: { title: string; dueDate?: string; 
   };
 }
 
-export async function updateTaskAction(id: string, data: { title?: string; completed?: boolean; dueDate?: string; urgent?: boolean }) {
+export async function updateTaskAction(id: string, data: { title?: string; category?: string; completed?: boolean; dueDate?: string; urgent?: boolean }) {
   const userId = await getUserId();
   const task = await prisma.task.update({
     where: { id, userId },
@@ -55,6 +57,7 @@ export async function updateTaskAction(id: string, data: { title?: string; compl
       completed: data.completed,
       dueDate: data.dueDate ? new Date(data.dueDate) : data.dueDate === "" ? null : undefined,
       urgent: data.urgent,
+      category: data.category,
     }
   });
   revalidatePath("/");

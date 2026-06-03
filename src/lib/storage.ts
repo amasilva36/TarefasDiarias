@@ -5,6 +5,7 @@ export type Task = {
   dueDate?: string; // ISO date string
   reminderDate?: string; // ISO date string
   urgent?: boolean;
+  category?: string;
 };
 
 export type ReminderRepeat = 'none' | 'daily' | 'weekly' | 'monthly';

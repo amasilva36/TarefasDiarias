@@ -34,6 +34,7 @@ model PushSubscription {
 model Task {
   id           String    @id @default(cuid())
   title        String
+  category     String?
   completed    Boolean   @default(false)
   dueDate      DateTime?
   reminderDate DateTime?
