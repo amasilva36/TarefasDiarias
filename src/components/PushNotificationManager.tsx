@@ -28,7 +28,11 @@ export default function PushNotificationManager() {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
+      // Timeout de segurança: se o SW demorar mais de 4s, mostra o botão na mesma
+      const timeout = setTimeout(() => setLoading(false), 4000);
+
       navigator.serviceWorker.ready.then((reg) => {
+        clearTimeout(timeout);
         setRegistration(reg);
         reg.pushManager.getSubscription().then((sub) => {
           if (sub) {
@@ -37,6 +41,9 @@ export default function PushNotificationManager() {
           }
           setLoading(false);
         });
+      }).catch(() => {
+        clearTimeout(timeout);
+        setLoading(false);
       });
     } else {
       setLoading(false);
