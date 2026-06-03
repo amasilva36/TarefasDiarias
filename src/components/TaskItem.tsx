@@ -94,7 +94,7 @@ export function TaskItem({ task }: { task: Task }) {
       </button>
       <div className="flex-1 min-w-0">
         <p className={cn("text-sm font-medium truncate transition-all duration-300", task.completed && "line-through text-muted-foreground")}>{task.title}</p>
-        {(task.dueDate || isOverdue || task.urgent) && (
+        {(task.dueDate || isOverdue || task.urgent || task.category) && (
           <div className="flex items-center gap-2 mt-1">
             {task.dueDate && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
