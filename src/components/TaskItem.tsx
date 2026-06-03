@@ -5,7 +5,6 @@ import { Check, Trash2, Clock, Pencil, Save, X } from "lucide-react";
 import { Task } from "@/lib/storage";
 import { useTasks } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 
 export function TaskItem({ task }: { task: Task }) {
@@ -46,13 +45,7 @@ export function TaskItem({ task }: { task: Task }) {
 
   if (isEditing) {
     return (
-      <motion.div 
-        layout
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="flex flex-col gap-3 p-4 border-b border-border bg-card/80 backdrop-blur-md"
-      >
+      <div className="flex flex-col gap-3 p-4 border-b border-border bg-card/80 backdrop-blur-md animate-[fadeSlideIn_0.25s_ease-out]">
         <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
           className="w-full bg-transparent border-b border-border pb-1 focus:outline-none text-sm text-foreground focus:border-primary transition-colors" autoFocus />
         <div className="flex items-center gap-2">
@@ -64,23 +57,16 @@ export function TaskItem({ task }: { task: Task }) {
           <button onClick={handleCancel} className="p-1.5 text-muted-foreground hover:bg-muted rounded-full"><X className="w-4 h-4" /></button>
           <button onClick={handleSave} disabled={!editTitle.trim()} className="p-1.5 text-primary hover:bg-primary/20 rounded-full disabled:opacity-50"><Save className="w-4 h-4" /></button>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div 
-      layout
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-      whileHover={{ scale: 1.01 }}
-      className={cn("flex items-center gap-3 p-4 border-b border-border bg-card/40 backdrop-blur-sm transition-all hover:bg-card/80", task.completed && "opacity-50")}
-    >
+    <div className={cn("flex items-center gap-3 p-4 border-b border-border bg-card/40 backdrop-blur-sm transition-all hover:bg-card/80 hover:scale-[1.01] hover:shadow-lg animate-[fadeSlideIn_0.3s_ease-out]", task.completed && "opacity-50")}>
       <button onClick={handleToggleComplete}
         className={cn("w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300",
           task.completed ? "bg-primary border-primary text-primary-foreground scale-110" : "border-muted-foreground hover:border-primary")}>
-        {task.completed && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}><Check className="w-3.5 h-3.5" /></motion.div>}
+        {task.completed && <Check className="w-3.5 h-3.5 animate-[popIn_0.2s_ease-out]" />}
       </button>
       <div className="flex-1 min-w-0">
         <p className={cn("text-sm font-medium truncate transition-all duration-300", task.completed && "line-through text-muted-foreground")}>{task.title}</p>
@@ -105,6 +91,6 @@ export function TaskItem({ task }: { task: Task }) {
         <button onClick={() => setIsEditing(true)} className="p-2 text-muted-foreground hover:text-primary rounded-full transition-colors"><Pencil className="w-4 h-4" /></button>
         <button onClick={() => { if (confirm("Eliminar tarefa?")) removeTask(task.id); }} className="p-2 text-muted-foreground hover:text-destructive rounded-full transition-colors"><Trash2 className="w-4 h-4" /></button>
       </div>
-    </motion.div>
+    </div>
   );
 }

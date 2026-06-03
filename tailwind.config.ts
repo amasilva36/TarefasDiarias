@@ -67,10 +67,21 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "fadeSlideIn": {
+          from: { opacity: "0", transform: "translateX(-12px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        "popIn": {
+          "0%": { transform: "scale(0)" },
+          "70%": { transform: "scale(1.2)" },
+          "100%": { transform: "scale(1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fadeSlideIn": "fadeSlideIn 0.3s ease-out",
+        "popIn": "popIn 0.25s ease-out",
       },
     },
   },
