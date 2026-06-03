@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CheckSquare, Bell, ShoppingCart, CalendarDays } from "lucide-react";
+import { CheckSquare, Bell, ShoppingCart, CalendarDays, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTasks, useReminders, useMarket } from "@/lib/store";
 
@@ -16,6 +16,7 @@ export function BottomNav() {
   const pendingMarket = items.filter(i => !i.bought).length;
 
   const tabs = [
+    { name: "Início", path: "/", icon: Home, badge: 0 },
     { name: "Tarefas", path: "/tarefas", icon: CheckSquare, badge: pendingTasks },
     { name: "Lembretes", path: "/lembretes", icon: Bell, badge: reminders.length },
     { name: "Mercado", path: "/supermercado", icon: ShoppingCart, badge: pendingMarket },
@@ -25,7 +26,7 @@ export function BottomNav() {
   return (
     <nav className="absolute bottom-0 w-full h-16 bg-card/80 backdrop-blur-xl border-t border-border flex items-center justify-around z-50">
       {tabs.map(tab => {
-        const isActive = pathname === tab.path || (pathname === '/' && tab.path === '/tarefas');
+        const isActive = pathname === tab.path;
         return (
           <Link key={tab.path} href={tab.path}
             className={cn("flex flex-col items-center justify-center w-full h-full gap-1 transition-colors relative", 
