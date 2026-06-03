@@ -62,6 +62,7 @@ model MarketItem {
   title     String
   category  String
   bought    Boolean  @default(false)
+  orderIndex Int     @default(0)
   createdAt DateTime @default(now())
 
   userId    String

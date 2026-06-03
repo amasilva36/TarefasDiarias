@@ -36,6 +36,7 @@ export type MarketItem = {
   title: string;
   category: MarketCategory;
   bought: boolean;
+  orderIndex: number;
 };
 
 // Generic storage wrapper

@@ -15,18 +15,25 @@ export async function getMarketItemsAction() {
   const userId = await getUserId();
   const items = await prisma.marketItem.findMany({
     where: { userId },
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ orderIndex: "asc" }, { createdAt: "asc" }],
   });
   return items;
 }
 
 export async function createMarketItemAction(data: { title: string; category: string }) {
   const userId = await getUserId();
+  const maxItem = await prisma.marketItem.findFirst({
+    where: { userId, category: data.category },
+    orderBy: { orderIndex: "desc" },
+  });
+  const newOrderIndex = maxItem ? maxItem.orderIndex + 1 : 0;
+
   const item = await prisma.marketItem.create({
     data: {
       title: data.title,
       category: data.category,
       bought: false,
+      orderIndex: newOrderIndex,
       userId,
     }
   });
@@ -59,5 +66,17 @@ export async function clearBoughtMarketItemsAction() {
 export async function clearAllMarketItemsAction() {
   const userId = await getUserId();
   await prisma.marketItem.deleteMany({ where: { userId } });
+  revalidatePath("/supermercado");
+}
+
+export async function reorderMarketItemsAction(updates: { id: string; orderIndex: number }[]) {
+  const userId = await getUserId();
+  const queries = updates.map(update => 
+    prisma.marketItem.update({
+      where: { id: update.id, userId },
+      data: { orderIndex: update.orderIndex }
+    })
+  );
+  await prisma.$transaction(queries);
   revalidatePath("/supermercado");
 }

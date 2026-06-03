@@ -6,7 +6,7 @@ import { storage, Task, Reminder, MarketItem } from "./storage";
 // ─── TASKS ───────────────────────────────────────────────────────
 import { getTasksAction, createTaskAction, updateTaskAction, deleteTaskAction } from "@/app/actions/tasks";
 import { getRemindersAction, createReminderAction, updateReminderAction, deleteReminderAction } from "@/app/actions/reminders";
-import { getMarketItemsAction, createMarketItemAction, updateMarketItemAction, deleteMarketItemAction, clearBoughtMarketItemsAction, clearAllMarketItemsAction } from "@/app/actions/market";
+import { getMarketItemsAction, createMarketItemAction, updateMarketItemAction, deleteMarketItemAction, clearBoughtMarketItemsAction, clearAllMarketItemsAction, reorderMarketItemsAction } from "@/app/actions/market";
 
 const TASKS_KEY = "@omeudia:tasks";
 
@@ -160,6 +160,7 @@ type MarketCtx = {
   addItem: (i: Omit<MarketItem, "id">) => void;
   updateItem: (id: string, updates: Partial<MarketItem>) => void;
   removeItem: (id: string) => void;
+  reorderItems: (updates: { id: string; orderIndex: number }[]) => void;
   clearBought: () => void;
   clearAll: () => void;
 };
@@ -209,6 +210,24 @@ export function MarketProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const reorderItems = async (updates: { id: string; orderIndex: number }[]) => {
+    // optimistic update local state
+    setItems(prev => {
+      const newItems = [...prev];
+      updates.forEach(u => {
+        const item = newItems.find(i => i.id === u.id);
+        if (item) item.orderIndex = u.orderIndex;
+      });
+      return newItems;
+    });
+    try {
+      await reorderMarketItemsAction(updates);
+    } catch (e) {
+      const fresh = await getMarketItemsAction();
+      setItems(fresh as any);
+    }
+  };
+
   const clearBought = async () => {
     setItems(prev => prev.filter(i => !i.bought));
     try {
@@ -230,7 +249,7 @@ export function MarketProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <MarketContext.Provider value={{ items, isLoaded, addItem, updateItem, removeItem, clearBought, clearAll }}>
+    <MarketContext.Provider value={{ items, isLoaded, addItem, updateItem, removeItem, reorderItems, clearBought, clearAll }}>
       {children}
     </MarketContext.Provider>
   );
