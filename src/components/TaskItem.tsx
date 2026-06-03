@@ -29,16 +29,18 @@ export function TaskItem({ task }: { task: Task }) {
     const isCompleting = !task.completed;
     updateTask(task.id, { completed: isCompleting });
 
-    // Disparar confetti se for concluir a última tarefa pendente!
     if (isCompleting) {
-      const pendingTasks = tasks.filter(t => !t.completed);
-      if (pendingTasks.length === 1 && pendingTasks[0].id === task.id) {
-        confetti({
-          particleCount: 150,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#22d3ee', '#3b82f6', '#8b5cf6', '#a855f7', '#ffffff']
-        });
+      // Conta quantas tarefas pendentes ficam (excluindo esta)
+      const remainingPending = tasks.filter(t => !t.completed && t.id !== task.id);
+
+      if (remainingPending.length === 0) {
+        // 🎊 Última tarefa! Mega celebração!
+        confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 }, colors: ['#22d3ee', '#3b82f6', '#8b5cf6', '#a855f7', '#ffffff'] });
+        setTimeout(() => confetti({ particleCount: 100, angle: 60, spread: 55, origin: { x: 0 } }), 250);
+        setTimeout(() => confetti({ particleCount: 100, angle: 120, spread: 55, origin: { x: 1 } }), 450);
+      } else {
+        // ✨ Confetti simples por cada conclusão
+        confetti({ particleCount: 60, spread: 50, origin: { y: 0.7 }, colors: ['#22d3ee', '#8b5cf6', '#ffffff'] });
       }
     }
   };
