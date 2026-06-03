@@ -3,6 +3,7 @@
 import { useTasks } from "@/lib/store";
 import { TaskForm } from "@/components/TaskForm";
 import { TaskItem } from "@/components/TaskItem";
+import { AnimatePresence } from "framer-motion";
 
 export default function TarefasPage() {
   const { tasks, isLoaded } = useTasks();
@@ -47,11 +48,15 @@ export default function TarefasPage() {
           </div>
         ) : (
           <>
-            {pending.map((task) => <TaskItem key={task.id} task={task} />)}
+            <AnimatePresence initial={false}>
+              {pending.map((task) => <TaskItem key={task.id} task={task} />)}
+            </AnimatePresence>
             {done.length > 0 && (
               <>
                 <div className="px-4 py-2 mt-2 text-xs font-semibold text-muted-foreground uppercase tracking-widest">Concluídas ({done.length})</div>
-                {done.map((task) => <TaskItem key={task.id} task={task} />)}
+                <AnimatePresence initial={false}>
+                  {done.map((task) => <TaskItem key={task.id} task={task} />)}
+                </AnimatePresence>
               </>
             )}
           </>
