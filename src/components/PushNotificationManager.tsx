@@ -22,18 +22,11 @@ function urlBase64ToUint8Array(base64String: string) {
 
 async function getOrRegisterSW(): Promise<ServiceWorkerRegistration | null> {
   try {
-    // 1. Tenta obter um registo existente
-    let reg = await navigator.serviceWorker.getRegistration('/');
-    if (reg) return reg;
-
-    // 2. Se não existir, tenta registar o sw.js manualmente
-    reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-    
-    // 3. Aguarda que fique ativo (com timeout de 5s)
-    return await Promise.race([
-      navigator.serviceWorker.ready,
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
-    ]) as ServiceWorkerRegistration | null;
+    // Regista o nosso sw.js explicitamente
+    const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    // Aguarda que fique ativo
+    await navigator.serviceWorker.ready;
+    return reg;
   } catch (e) {
     console.error("Erro ao registar Service Worker:", e);
     return null;
